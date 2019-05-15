@@ -7,16 +7,39 @@ import scala.io.Source._
 import collection.JavaConversions._
 
 /**
- * Processes source code files (Java or text file in general) and cuts
- * off code snippets.
- * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
- * @param file The source code to process.
- * @param snippetTargetDir Directory to store snippets.
- * @param fullTargetDir Directory to store complete sources including
-  *                      packages.
- */
-class ExtractCodeSnippet(val file: File, val snippetTargetDir: String,
-                         fullTargetDir: String, val exerciseEnv: Boolean) {
+  * Processes source code files (Java or text file in general) and cuts
+  * off code or text snippets. Text snippets are blocks with a
+  * start and an end symbol which is part of of a comment line.
+  * Known snippets are listed below. snipID is a unique identifier
+  * or label for a snippet, e.g. "Slide". + indicates a start of a
+  * block and - the end.
+  * <list>
+  * </item>// +IN snipID ... // -IN snipID. Includes this block in
+  * the output files.
+  * </item>// +OUT snipID ... // -OUT snipID. Excludes this block in
+  * * the output files.
+  * </list>
+  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
+  * @param file             The source code to process.
+  * @param commentEscape    Comment symbol for a single line comment.
+  *                         E.g. "//" in Java or C/C++,
+  *                         "#" in Python or R etc.
+  * @param snippetTargetDir Directory to store snippets.
+  * @param fullTargetDir    Directory to store complete sources including
+  *                         packages.
+  */
+class ExtractCodeSnippet(val file: File, val commentEscape: String,
+                         val snippetTargetDir: String,
+                         fullTargetDir: String,
+                         val exerciseEnv: Boolean) {
+
+  /**
+    * Like main constructor except that commentEscape is set to
+    * Java-like "//".
+    */
+  def this(file: File, snippetTargetDir: String,
+           fullTargetDir: String, exerciseEnv: Boolean) =
+    this(file, "//", snippetTargetDir, fullTargetDir, exerciseEnv)
 
   process()
 
@@ -25,9 +48,9 @@ class ExtractCodeSnippet(val file: File, val snippetTargetDir: String,
 
     val DEFAULTLABEL = "x8gfz4hd" // just a crazy string.
     /**
-     * Key: a label taken from the annotated source code.
-     * Values: text buffer to output.
-     */
+      * Key: a label taken from the annotated source code.
+      * Values: text buffer to output.
+      */
     val outputCollector = new util.HashMap[String, Record]
 
     var quiet = false // if true, lines are omitted.
@@ -167,42 +190,42 @@ class ExtractCodeSnippet(val file: File, val snippetTargetDir: String,
     def testToken(line: String): Option[Token] = {
       val tokens = line.trim.split(" ")
       if (tokens.size == 2) {
-        if (tokens(0) == "//" && tokens(1) == "+OUT") {
+        if (tokens(0) == commentEscape && tokens(1) == "+OUT") {
           return Some(QuietToken(true))
         }
-        if (tokens(0) == "//" && tokens(1) == "-OUT") {
+        if (tokens(0) == commentEscape && tokens(1) == "-OUT") {
           return Some(QuietToken(false))
         }
-        if (tokens(0) == "//" && tokens(1) == "+EXC") {
+        if (tokens(0) == commentEscape && tokens(1) == "+EXC") {
           return Some(ExerciseToken(true))
         }
-        if (tokens(0) == "//" && tokens(1) == "-EXC") {
+        if (tokens(0) == commentEscape && tokens(1) == "-EXC") {
           return Some(ExerciseToken(false))
         }
-        if (tokens(0) == "//" && tokens(1) == "-EXCSUBST") {
+        if (tokens(0) == commentEscape && tokens(1) == "-EXCSUBST") {
           return Some(ExerciseReplaceToken("", false))
         }
-        if (tokens(0) == "//" && tokens(1) == "-HEADER") {
+        if (tokens(0) == commentEscape && tokens(1) == "-HEADER") {
           return Some(ReplaceToken("", false))
         }
-        if (tokens(0) == "//" && tokens(1) == "-VAR") {
+        if (tokens(0) == commentEscape && tokens(1) == "-VAR") {
           return Some(ReplaceToken("", false))
         }
       }
       if (tokens.size >= 3) {
-        if (tokens(0) == "//" && tokens(1) == "+IN") {
+        if (tokens(0) == commentEscape && tokens(1) == "+IN") {
           return Some(RegularToken(tokens(2), true))
         }
-        if (tokens(0) == "//" && tokens(1) == "-IN") {
+        if (tokens(0) == commentEscape && tokens(1) == "-IN") {
           return Some(RegularToken(tokens(2), false))
         }
-        if (tokens(0) == "//" && tokens(1) == "+HEADER") {
+        if (tokens(0) == commentEscape && tokens(1) == "+HEADER") {
           val o = for (i <- 2 until tokens.size) yield {
             tokens(i)
           }
           return Some(ReplaceToken(o.mkString(" "), true))
         }
-        if (tokens(0) == "//" && tokens(1) == "+VAR") {
+        if (tokens(0) == commentEscape && tokens(1) == "+VAR") {
           val indent = tokens(2).toInt
           val o = for (i <- 3 until tokens.size) yield {
             tokens(i)
@@ -210,7 +233,7 @@ class ExtractCodeSnippet(val file: File, val snippetTargetDir: String,
           val spaces = (1 to indent).map(c => ' ').mkString
           return Some(ReplaceToken(spaces + o.mkString(" "), true))
         }
-        if (tokens(0) == "//" && tokens(1) == "+EXCSUBST") {
+        if (tokens(0) == commentEscape && tokens(1) == "+EXCSUBST") {
           val indent = tokens(2).toInt
           val o = for (i <- 3 until tokens.size) yield {
             tokens(i)
@@ -242,9 +265,9 @@ case class ReplaceToken(s: String, start: Boolean) extends Token(start)
 case class ExerciseReplaceToken(s: String, start: Boolean) extends Token(start)
 
 /**
- *
- * @param active true if lines are printed.
- * @param counter number of code snippets (until now)
- * @param buffer buffer to collect the output text.
- */
+  *
+  * @param active  true if lines are printed.
+  * @param counter number of code snippets (until now)
+  * @param buffer  buffer to collect the output text.
+  */
 case class Record(var active: Boolean, var counter: Int = 1, buffer: StringBuffer = new StringBuffer())

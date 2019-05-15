@@ -4,7 +4,7 @@
     <groupId>net.gumbix</groupId>
     <artifactId>snips-core</artifactId>
     <name>Snips core</name>
-    <version>0.5.0</version>
+    <version>0.6.0</version>
     <packaging>jar</packaging>
 
     <parent>
@@ -12,14 +12,6 @@
         <artifactId>snips</artifactId>
         <version>1.0.0</version>
     </parent>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-math3</artifactId>
-            <version>3.5</version>
-        </dependency>
-    </dependencies>
 
     <build>
         <plugins>

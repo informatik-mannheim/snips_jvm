@@ -13,12 +13,14 @@ import java.util.Date
   *                         is written to (with subdirectories for
   *                         packages)
   * @param suffix           Endings of the files (by default .java)
+  *
   * @param exerciseEnv      ???
   * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
   *         (c) 2015 Markus Gumbel
   */
 class FileCollector(val srcDir: String, val snippetTargetDir: String,
                     val fullTargetDir: String, val suffix: String = ".java",
+                    val commentEscape: String = "//",
                     val exerciseEnv: Boolean) {
 
   val blackList = Set()
@@ -35,7 +37,7 @@ class FileCollector(val srcDir: String, val snippetTargetDir: String,
     val fullTargetDirPackage = fullTargetDir + suffixPath
     val allFiles = dir.listFiles().filter(f => !f.isDirectory && f.getName.endsWith(suffix))
     for (file <- allFiles) {
-      new ExtractCodeSnippet(file, snippetTargetDir,
+      new ExtractCodeSnippet(file, commentEscape, snippetTargetDir,
         fullTargetDirPackage, exerciseEnv);
     }
     val dirs = dir.listFiles().filter(_.isDirectory)
@@ -57,9 +59,9 @@ object FileCollector {
       new FileCollector("c:\\Users\\Markus\\Local-Docs\\src\\jvm\\PR2\\public\\src\\main\\java",
         "c:\\Users\\Markus\\Local-Docs\\Professur-HS-Mannheim\\Vorlesungen\\PR2\\Script-Slides\\snippets",
         "c:\\Users\\Markus\\Local-Docs\\src\\jvm\\PR2-gen\\public",
-        ".java", true)
-    } else if (args.size == 5) {
-      new FileCollector(args(0), args(1), args(2), args(3), args(4).toBoolean)
+        ".java", "//", true)
+    } else if (args.size == 6) {
+      new FileCollector(args(0), args(1), args(2), args(3), args(4), args(5).toBoolean)
     } else {
       print("usage: FileCollector <src> <snippetTargetDir> <fullTargetDir> <suffix>")
     }
