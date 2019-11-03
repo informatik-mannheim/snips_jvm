@@ -7,8 +7,8 @@ import scala.io.Source._
 import collection.JavaConversions._
 
 /**
-  * Processes source code files (Java or text file in general) and cuts
-  * off code or text snippets. Text snippets are blocks with a
+  * Processes source code files (Java or text file in general) and
+  * cuts off code or text snippets. Text snippets are blocks with a
   * start and an end symbol which is part of of a comment line.
   * Known snippets are listed below. snipID is a unique identifier
   * or label for a snippet, e.g. "Slide". + indicates a start of a
@@ -25,12 +25,13 @@ import collection.JavaConversions._
   *                         E.g. "//" in Java or C/C++,
   *                         "#" in Python or R etc.
   * @param snippetTargetDir Directory to store snippets.
-  * @param fullTargetDir    Directory to store complete sources including
-  *                         packages.
+  * @param srcTargetDir     Directory to store complete sources
+  *                         including packages.
   */
-class ExtractCodeSnippet(val file: File, val commentEscape: String,
+class ExtractCodeSnippet(val file: File,
+                         val commentEscape: String,
                          val snippetTargetDir: String,
-                         fullTargetDir: String,
+                         srcTargetDir: String,
                          val exerciseEnv: Boolean) {
 
   /**
@@ -160,7 +161,7 @@ class ExtractCodeSnippet(val file: File, val commentEscape: String,
         label match {
           case DEFAULTLABEL => {
             writeFile(snippetTargetDir + "/" + file.getName)
-            writeFile(fullTargetDir + "/" + file.getName)
+            writeFile(srcTargetDir + "/" + file.getName)
           }
           case _ => {
             writeFile(snippetTargetDir + "/" + filename + "_" + label + "." + suffix)

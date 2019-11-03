@@ -4,24 +4,28 @@ import java.io.File
 import java.util.Date
 
 /**
-  * Collects recursively all files with a specific suffix starting from a
-  * start directory. It calls a code snippet extractor for further
-  * processing.
+  * Collects recursively all files with a specific suffix starting
+  * from a start directory. It calls a code snippet extractor for
+  * further processing.
   * @param srcDir           Pathname of the source code's root directory.
   * @param snippetTargetDir Directory where the snippets are written to.
-  * @param fullTargetDir    Directory where the full but stripped file
-  *                         is written to (with subdirectories for
-  *                         packages)
+  * @param srcTargetDir     Directory where the complete but stripped
+  *                         source files are written to
+  *                         (with subdirectories for packages).
   * @param suffix           Endings of the files (by default .java)
-  *
-  * @param exerciseEnv      ???
+  * @param exerciseEnv      If true, the public directory contains
+  *                         also the solutions; if false, the
+  *                         solutoins are excluded. This is controlled
+  *                         by the EXC and EXCSUBST option.
   * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
-  *         (c) 2015 Markus Gumbel
+  *         (c) 2015-19 Markus Gumbel
   */
-class FileCollector(val srcDir: String, val snippetTargetDir: String,
-                    val fullTargetDir: String, val suffix: String = ".java",
-                    val commentEscape: String = "//",
-                    val exerciseEnv: Boolean) {
+class SnippetFileCollector(val srcDir: String,
+                           val snippetTargetDir: String,
+                           val srcTargetDir: String,
+                           val suffix: String = ".java",
+                           val commentEscape: String = "//",
+                           val exerciseEnv: Boolean) {
 
   val blackList = Set()
 
@@ -34,7 +38,7 @@ class FileCollector(val srcDir: String, val snippetTargetDir: String,
       }
     }
 
-    val fullTargetDirPackage = fullTargetDir + suffixPath
+    val fullTargetDirPackage = srcTargetDir + suffixPath
     val allFiles = dir.listFiles().filter(f => !f.isDirectory && f.getName.endsWith(suffix))
     for (file <- allFiles) {
       new ExtractCodeSnippet(file, commentEscape, snippetTargetDir,
@@ -44,7 +48,7 @@ class FileCollector(val srcDir: String, val snippetTargetDir: String,
     for (dir <- dirs) {
       // Append this directory to the suffix path:
       val newSuffixPath = suffixPath + "/" + dir.getName
-      createDirIfNotExists(fullTargetDir + newSuffixPath)
+      createDirIfNotExists(srcTargetDir + newSuffixPath)
       scanRec(dir, newSuffixPath)
     }
   }
@@ -53,17 +57,17 @@ class FileCollector(val srcDir: String, val snippetTargetDir: String,
   println("done")
 }
 
-object FileCollector {
+object SnippetFileCollector {
   def main(args: Array[String]) {
     if (args.size == 0) {
-      new FileCollector("c:\\Users\\Markus\\Local-Docs\\src\\jvm\\PR2\\public\\src\\main\\java",
+      new SnippetFileCollector("c:\\Users\\Markus\\Local-Docs\\src\\jvm\\PR2\\public\\src\\main\\java",
         "c:\\Users\\Markus\\Local-Docs\\Professur-HS-Mannheim\\Vorlesungen\\PR2\\Script-Slides\\snippets",
         "c:\\Users\\Markus\\Local-Docs\\src\\jvm\\PR2-gen\\public",
         ".java", "//", true)
     } else if (args.size == 6) {
-      new FileCollector(args(0), args(1), args(2), args(3), args(4), args(5).toBoolean)
+      new SnippetFileCollector(args(0), args(1), args(2), args(3), args(4), args(5).toBoolean)
     } else {
-      print("usage: FileCollector <src> <snippetTargetDir> <fullTargetDir> <suffix>")
+      print("usage: SnippetFileCollector <src> <snippetTargetDir> <srcTargetDir> <suffix>")
     }
   }
 }
