@@ -45,7 +45,39 @@ class ExtractCodeSnippet(val file: File,
   process()
 
   def process() {
-    println(file.getName)
+
+    /**
+      * Test if the file to be processed is newer at all.
+      * The time stamp of the file is compared to the
+      * file being generated.
+      * @return True if time stamp of file is newer than
+      *         processed file or if the processed file
+      *         does not exist yet. False if not.
+      */
+    def testIfNew() = {
+      // Time stamp (in ms) when source file was last modified:
+      val srcModTime = file.lastModified
+      // Target
+      val targetSnippetFileName = snippetTargetDir + "/" + file.getName
+      val targetSnippetFile = new File(targetSnippetFileName);
+      val targetSrcFileName = srcTargetDir + "/" + file.getName
+      val targetSrcFile = new File(targetSrcFileName);
+      // Both, the snippet and the source file must exist:
+      if (targetSnippetFile.exists() && targetSrcFile.exists()) {
+        // Time stamp (in ms) when target file was last modified:
+        val targetModTime = targetSnippetFile.lastModified
+        srcModTime > targetModTime // file newer?
+      } else {
+        true // This file needs to be (re-)created.
+      }
+    }
+
+    if (testIfNew()) {
+      println(file.getName + " (updated)")
+    } else {
+      // println(" (not modified)")
+      return
+    }
 
     val DEFAULTLABEL = "x8gfz4hd" // just a crazy string.
     /**
@@ -56,11 +88,11 @@ class ExtractCodeSnippet(val file: File,
 
     var quiet = false // if true, lines are omitted.
     var exerciseQuiet = false // if true, lines are not omitted.
-    var counter = 0;
+    var counter = 0
     // line counter
     val noLines = fromFile(file).size // of the the source file
     // This is the default snippet extracting the whole source code.
-    start(DEFAULTLABEL);
+    start(DEFAULTLABEL)
 
     // Process each line...
     for (line <- fromFile(file).getLines()) {

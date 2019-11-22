@@ -15,7 +15,7 @@ import java.util.Date
   * @param suffix           Endings of the files (by default .java)
   * @param exerciseEnv      If true, the public directory contains
   *                         also the solutions; if false, the
-  *                         solutoins are excluded. This is controlled
+  *                         solutions are excluded. This is controlled
   *                         by the EXC and EXCSUBST option.
   * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
   *         (c) 2015-19 Markus Gumbel
@@ -53,8 +53,10 @@ class SnippetFileCollector(val srcDir: String,
     }
   }
 
+  val mode = if (exerciseEnv) "(mode EXC) " else ""
+  print("Scanning " + mode  + srcDir)
   scanRec(new File(srcDir), "") // no suffix path at beginning.
-  println("done")
+  println(" ... done")
 }
 
 object SnippetFileCollector {
@@ -62,7 +64,7 @@ object SnippetFileCollector {
     if (args.size == 0) {
       new SnippetFileCollector("c:\\Users\\Markus\\Local-Docs\\src\\jvm\\PR2\\public\\src\\main\\java",
         "c:\\Users\\Markus\\Local-Docs\\Professur-HS-Mannheim\\Vorlesungen\\PR2\\Script-Slides\\snippets",
-        "c:\\Users\\Markus\\Local-Docs\\src\\jvm\\PR2-gen\\public",
+        "c:\\Users\\Markus\\Local-Docs\\src\\jvm\\PR2-gen\\publicExercise",
         ".java", "//", true)
     } else if (args.size == 6) {
       new SnippetFileCollector(args(0), args(1), args(2), args(3), args(4), args(5).toBoolean)
