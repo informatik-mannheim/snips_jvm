@@ -71,7 +71,7 @@ to generate full documentation.
             <plugin>
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
-                <version>3.4.2</version>
+                <version>4.3.0</version>
                 <executions>
                     <execution>
                         <id>main-scalac</id>
@@ -91,7 +91,7 @@ to generate full documentation.
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
-                <version>3.0</version>
+                <version>3.9.0</version>
                 <configuration>
                     <reportPlugins>
                         <plugin>
