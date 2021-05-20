@@ -54,6 +54,15 @@ class ExtractCodeSnippetTest {
   }
 
   @Test
+  def test_RMD_EXC() {
+    val filenamePrefix = "Testfile_EXC"
+    performSnippet(filenamePrefix, ".Rmd", commentEscape = "#", commentEscape2 = "//")
+    val (p, s) = compareTestfiles(filenamePrefix, ".Rmd")
+    assertTrue(p)
+    assertTrue(s)
+  }
+
+  @Test
   def test_Foo_Slide() {
     val filenamePrefix = "Testfile_IN_Slide"
     performSnippet(filenamePrefix)
@@ -62,7 +71,7 @@ class ExtractCodeSnippetTest {
     assertTrue(s)
 
     // There is one snippet in here:
-    val (p2, s2) = compareSnippetTestfiles(filenamePrefix, "Slide")
+    val (p2, s2) = compareSnippetTestfiles(filenamePrefix, ".java", "Slide")
     assertTrue(p2)
     assertTrue(s2)
   }
@@ -74,20 +83,21 @@ class ExtractCodeSnippetTest {
     * @return A tuple of size 2. First entry: result of public
     *         snippet; second entry: result of solution snippet.
     */
-  def performSnippet(filenamePrefix: String) = {
-    val filename = filenamePrefix + ".java"
+  def performSnippet(filenamePrefix: String, suffix: String = ".java",
+                     commentEscape: String = "//", commentEscape2: String = "") = {
+    val filename = filenamePrefix + suffix
     val file = new File(srcDir + "/" + filename)
 
-    val p = new ExtractCodeSnippet(file, "//",
+    val p = new ExtractCodeSnippet(file, commentEscape, commentEscape2,
       snippetsPublicTargetDir, srcPublicTargetDir, false, true)
-    val s = new ExtractCodeSnippet(file, "//",
+    val s = new ExtractCodeSnippet(file, commentEscape, commentEscape2,
       snippetsSolutionTargetDir, srcSolutionTargetDir, true, true)
   }
 
-  def compareTestfiles(filenamePrefix: String) = {
-    val filename = filenamePrefix + ".java"
-    val filenamePublic = filenamePrefix + "-public.java"
-    val filenameSolution = filenamePrefix + "-solution.java"
+  def compareTestfiles(filenamePrefix: String, suffix: String = ".java") = {
+    val filename = filenamePrefix + suffix
+    val filenamePublic = filenamePrefix + "-public" + suffix
+    val filenameSolution = filenamePrefix + "-solution" + suffix
 
     val p = compareFiles(srcDir + "/" + filenamePublic,
       srcPublicTargetDir + "/" + filename)
@@ -96,12 +106,12 @@ class ExtractCodeSnippetTest {
     (p, s)
   }
 
-  def compareSnippetTestfiles(filenamePrefix: String,
+  def compareSnippetTestfiles(filenamePrefix: String, suffix: String,
                               snippet: String) = {
     val filenamePrefix2 = filenamePrefix + "_" + snippet
-    val filename = filenamePrefix2 + ".java"
-    val filenamePublic = filenamePrefix2 + "-public.java"
-    val filenameSolution = filenamePrefix2 + "-solution.java"
+    val filename = filenamePrefix2 + suffix
+    val filenamePublic = filenamePrefix2 + "-public" + suffix
+    val filenameSolution = filenamePrefix2 + "-solution" + suffix
 
     val p = compareFiles(srcDir + "/" + filenamePublic,
       snippetsPublicTargetDir + "/" + filename)
