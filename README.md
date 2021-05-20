@@ -227,7 +227,8 @@ public class Bar {
 
 This concept can also be applied for text documents which are based on
  pure text like markdown or LaTeX. We will show an example for R markdown
- . The following documents contains some text and a code chunk in R.
+ . The following documents contains some text and a code chunk in R (the left
+  directed ' are displayed as normal ' for simplicity).
 
 ```
 ---
@@ -319,7 +320,7 @@ The published source code files are written to `srcSolution`. The option `True` 
 You allways start the tool by calling Java with
 `java -cp snips-core-0.9.x.jar net.gumbix.codesnippet.SnippetFileCollector`
 
-Then the parameters follows. These are:
+Then the parameters follow. These are:
 
  * `srcDir` Pathname (absolute or relative) of the source code's root directory.
  * `snippetTargetDir` Directory where the snippets are written to.
