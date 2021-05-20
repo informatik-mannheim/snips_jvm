@@ -25,6 +25,7 @@ import collection.JavaConversions._
  * @param commentEscape    Comment symbol for a single line comment.
  *                         E.g. "//" in Java or C/C++,
  *                         "#" in Python or R etc.
+ * @param commentEscape2   Alternative comment symbol for a single line comment.
  * @param snippetTargetDir Directory to store snippets.
  * @param srcTargetDir     Directory to store complete sources
  *                         including packages.
@@ -32,6 +33,7 @@ import collection.JavaConversions._
  */
 class ExtractCodeSnippet(val file: File,
                          val commentEscape: String,
+                         val commentEscape2: String,
                          val snippetTargetDir: String,
                          srcTargetDir: String,
                          val exerciseEnv: Boolean,
@@ -43,7 +45,7 @@ class ExtractCodeSnippet(val file: File,
    */
   def this(file: File, snippetTargetDir: String,
            fullTargetDir: String, exerciseEnv: Boolean, forceUpdate: Boolean) =
-    this(file, "//", snippetTargetDir, fullTargetDir, exerciseEnv, forceUpdate)
+    this(file, "//", "", snippetTargetDir, fullTargetDir, exerciseEnv, forceUpdate)
 
   process()
 
@@ -232,44 +234,53 @@ class ExtractCodeSnippet(val file: File,
 
     // Test if line is token. If so, return the appropriate token.
     def testToken(line: String): Option[Token] = {
+
+      def isCommentEscape(text: String) = {
+        if (commentEscape2 == "") {
+          text == commentEscape // only one escape comment
+        } else {
+          text == commentEscape || text == commentEscape2
+        }
+      }
+
       val tokens = line.trim.split(" ")
       if (tokens.size == 2) {
-        if (tokens(0) == commentEscape && tokens(1) == "+OUT") {
+        if (isCommentEscape(tokens(0)) && tokens(1) == "+OUT") {
           return Some(QuietToken(true))
         }
-        if (tokens(0) == commentEscape && tokens(1) == "-OUT") {
+        if (isCommentEscape(tokens(0)) && tokens(1) == "-OUT") {
           return Some(QuietToken(false))
         }
-        if (tokens(0) == commentEscape && tokens(1) == "+EXC") {
+        if (isCommentEscape(tokens(0)) && tokens(1) == "+EXC") {
           return Some(ExerciseToken(true))
         }
-        if (tokens(0) == commentEscape && tokens(1) == "-EXC") {
+        if (isCommentEscape(tokens(0)) && tokens(1) == "-EXC") {
           return Some(ExerciseToken(false))
         }
-        if (tokens(0) == commentEscape && tokens(1) == "-EXCSUBST") {
+        if (isCommentEscape(tokens(0)) && tokens(1) == "-EXCSUBST") {
           return Some(ExerciseReplaceToken("", false))
         }
-        if (tokens(0) == commentEscape && tokens(1) == "-HEADER") {
+        if (isCommentEscape(tokens(0)) && tokens(1) == "-HEADER") {
           return Some(ReplaceToken("", false))
         }
-        if (tokens(0) == commentEscape && tokens(1) == "-VAR") {
+        if (isCommentEscape(tokens(0)) && tokens(1) == "-VAR") {
           return Some(ReplaceToken("", false))
         }
       }
       if (tokens.size >= 3) {
-        if (tokens(0) == commentEscape && tokens(1) == "+IN") {
+        if (isCommentEscape(tokens(0)) && tokens(1) == "+IN") {
           return Some(RegularToken(tokens(2), true))
         }
-        if (tokens(0) == commentEscape && tokens(1) == "-IN") {
+        if (isCommentEscape(tokens(0)) && tokens(1) == "-IN") {
           return Some(RegularToken(tokens(2), false))
         }
-        if (tokens(0) == commentEscape && tokens(1) == "+HEADER") {
+        if (isCommentEscape(tokens(0)) && tokens(1) == "+HEADER") {
           val o = for (i <- 2 until tokens.size) yield {
             tokens(i)
           }
           return Some(ReplaceToken(o.mkString(" "), true))
         }
-        if (tokens(0) == commentEscape && tokens(1) == "+VAR") {
+        if (isCommentEscape(tokens(0)) && tokens(1) == "+VAR") {
           val indent = tokens(2).toInt
           val o = for (i <- 3 until tokens.size) yield {
             tokens(i)
@@ -277,7 +288,7 @@ class ExtractCodeSnippet(val file: File,
           val spaces = (1 to indent).map(c => ' ').mkString
           return Some(ReplaceToken(spaces + o.mkString(" "), true))
         }
-        if (tokens(0) == commentEscape && tokens(1) == "+EXCSUBST") {
+        if (isCommentEscape(tokens(0)) && tokens(1) == "+EXCSUBST") {
           val indent = tokens(2).toInt
           val o = for (i <- 3 until tokens.size) yield {
             tokens(i)

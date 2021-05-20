@@ -1,0 +1,14 @@
+---
+title: "Snips R markdown file"
+output: html_notebook
+---
+
+# header 1
+
+
+# header 2
+
+This is an example with a code chunk:
+```{r}
+a = 1
+```

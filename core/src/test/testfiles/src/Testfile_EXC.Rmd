@@ -1,0 +1,21 @@
+---
+title: "Snips R markdown file"
+output: html_notebook
+---
+
+# header 1
+
+// +EXC
+This is the solution. Please note that a # cannot be used as a comment in R markdown as it indicates a header. So // is used instead.
+// -EXC
+
+# header 2
+
+This is an example with a code chunk:
+```{r}
+a = 1
+# +EXC
+# This code will be removed in the public solution:
+print(a)
+# -EXC
+```
