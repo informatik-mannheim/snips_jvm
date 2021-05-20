@@ -10,3 +10,5 @@ id_file
 .project
 .settings
 *~
+core/src/test/testfiles/snippets*Target
+core/src/test/testfiles/src*Target
