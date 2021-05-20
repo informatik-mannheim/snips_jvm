@@ -254,6 +254,12 @@ print(a)
 '''
 ```
 
+Note that there were two escape comments used. 1) // for markdown and 2
+) # for R comments. This is useful because a # in markdown would render a
+ header. Thus, any snippet option would be displayed as a header in the
+  primary document. Telling snippet to use // as a comment with snippet
+   options mitigates this.
+
 The public version (in `srcPublic`) will then contain
 
 ```
