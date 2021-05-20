@@ -36,6 +36,24 @@ class ExtractCodeSnippetTest {
   }
 
   @Test
+  def test_OUT_EXC_Nested() {
+    val filenamePrefix = "Testfile_OUT_EXC_Nested"
+    performSnippet(filenamePrefix)
+    val (p, s) = compareTestfiles(filenamePrefix)
+    assertTrue(p)
+    assertTrue(s)
+  }
+
+  @Test
+  def test_EXCSUBST_OUT_Nested() {
+    val filenamePrefix = "Testfile_EXCSUBST_OUT_Nested"
+    performSnippet(filenamePrefix)
+    val (p, s) = compareTestfiles(filenamePrefix)
+    assertTrue(p)
+    assertTrue(s)
+  }
+
+  @Test
   def test_Foo_Slide() {
     val filenamePrefix = "Testfile_IN_Slide"
     performSnippet(filenamePrefix)

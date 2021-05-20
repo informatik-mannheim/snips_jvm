@@ -12,7 +12,7 @@ Snippets is a tool that supports the presentation and description of programs in
  * redirect the console output of a program which can be included into a text document.
  * record key execution steps and show the protocol in a text document.
 
-Snippet follows the _single source_ principle. You do not copy and paste source code or console output - instead the tool does this for you. Currently, snippets works for all programming languages which have single line comments (like // in Java or # in Python). The console output and traces is only possible yet for Java-based languages.
+Snippets follows the _single source_ principle. You do not copy and paste source code or console output - instead the tool does this for you. Currently, snippets works for all programming languages which have single line comments (like // in Java or # in Python). The console output and traces is only possible yet for Java-based languages.
 
 ## Prerequisites and installation
 
