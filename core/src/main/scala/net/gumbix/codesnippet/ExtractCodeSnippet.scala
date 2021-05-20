@@ -7,54 +7,61 @@ import scala.io.Source._
 import collection.JavaConversions._
 
 /**
-  * Processes source code files (Java or text file in general) and
-  * cuts off code or text snippets. Text snippets are blocks with a
-  * start and an end symbol which is part of of a comment line.
-  * Known snippets are listed below. snipID is a unique identifier
-  * or label for a snippet, e.g. "Slide". + indicates a start of a
-  * block and - the end.
-  * <list>
-  * </item>// +IN snipID ... // -IN snipID. Includes this block in
-  * the output files.
-  * </item>// +OUT snipID ... // -OUT snipID. Excludes this block in
-  * * the output files.
-  * </list>
-  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
-  * @param file             The source code to process.
-  * @param commentEscape    Comment symbol for a single line comment.
-  *                         E.g. "//" in Java or C/C++,
-  *                         "#" in Python or R etc.
-  * @param snippetTargetDir Directory to store snippets.
-  * @param srcTargetDir     Directory to store complete sources
-  *                         including packages.
-  */
+ * Processes source code files (Java or text file in general) and
+ * cuts off code or text snippets. Text snippets are blocks with a
+ * start and an end symbol which is part of of a comment line.
+ * Known snippets are listed below. snipID is a unique identifier
+ * or label for a snippet, e.g. "Slide". + indicates a start of a
+ * block and - the end.
+ * <list>
+ * </item>// +IN snipID ... // -IN snipID. Includes this block in
+ * the output files.
+ * </item>// +OUT snipID ... // -OUT snipID. Excludes this block in
+ * * the output files.
+ * </list>
+ *
+ * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
+ * @param file             The source code to process.
+ * @param commentEscape    Comment symbol for a single line comment.
+ *                         E.g. "//" in Java or C/C++,
+ *                         "#" in Python or R etc.
+ * @param snippetTargetDir Directory to store snippets.
+ * @param srcTargetDir     Directory to store complete sources
+ *                         including packages.
+ * @param forceUpdate      Always create the snips even if time stamp is older.
+ */
 class ExtractCodeSnippet(val file: File,
                          val commentEscape: String,
                          val snippetTargetDir: String,
                          srcTargetDir: String,
-                         val exerciseEnv: Boolean) {
+                         val exerciseEnv: Boolean,
+                         val forceUpdate: Boolean = false) {
 
   /**
-    * Like main constructor except that commentEscape is set to
-    * Java-like "//".
-    */
+   * Like main constructor except that commentEscape is set to
+   * Java-like "//".
+   */
   def this(file: File, snippetTargetDir: String,
-           fullTargetDir: String, exerciseEnv: Boolean) =
-    this(file, "//", snippetTargetDir, fullTargetDir, exerciseEnv)
+           fullTargetDir: String, exerciseEnv: Boolean, forceUpdate: Boolean) =
+    this(file, "//", snippetTargetDir, fullTargetDir, exerciseEnv, forceUpdate)
 
   process()
 
   def process() {
 
     /**
-      * Test if the file to be processed is newer at all.
-      * The time stamp of the file is compared to the
-      * file being generated.
-      * @return True if time stamp of file is newer than
-      *         processed file or if the processed file
-      *         does not exist yet. False if not.
-      */
-    def testIfNew() = {
+     * Test if the file to be processed is newer at all.
+     * The time stamp of the file is compared to the
+     * file being generated.
+     *
+     * @return True if time stamp of file is newer than
+     *         processed file or if the processed file
+     *         does not exist yet. False if not.
+     */
+    def testIfNew(): Boolean = {
+      if (forceUpdate) {
+        return true
+      }
       // Time stamp (in ms) when source file was last modified:
       val srcModTime = file.lastModified
       // Target
@@ -81,9 +88,9 @@ class ExtractCodeSnippet(val file: File,
 
     val DEFAULTLABEL = "x8gfz4hd" // just a crazy string.
     /**
-      * Key: a label taken from the annotated source code.
-      * Values: text buffer to output.
-      */
+     * Key: a label taken from the annotated source code.
+     * Values: text buffer to output.
+     */
     val outputCollector = new util.HashMap[String, Record]
 
     var quiet = false // if true, lines are omitted.
@@ -137,11 +144,13 @@ class ExtractCodeSnippet(val file: File,
           }
           quiet = true // prevents to output next line.
         }
-        case Some(ReplaceToken(text, false)) => {
+        case Some(ReplaceToken(text, false))
+        => {
           quiet = false // end marker, output is allowed again.
         }
-        case Some(ExerciseReplaceToken(text, true)) => {
-          if (!exerciseEnv) {
+        case Some(ExerciseReplaceToken(text, true))
+        => {
+          if (!exerciseEnv && !quiet) {
             for (r <- outputCollector.values()) {
               if (r.active) {
                 r.buffer.append(text + "\n")
@@ -150,7 +159,8 @@ class ExtractCodeSnippet(val file: File,
             quiet = true // prevents to output next line.
           }
         }
-        case Some(ExerciseReplaceToken(text, false)) => {
+        case Some(ExerciseReplaceToken(text, false))
+        => {
           quiet = false // end marker, output is allowed again.
         }
         case _ => {
@@ -166,6 +176,7 @@ class ExtractCodeSnippet(val file: File,
         }
       }
     }
+
     end(DEFAULTLABEL); // end default code snippet.
     writeFiles()
 
@@ -278,29 +289,34 @@ class ExtractCodeSnippet(val file: File,
       None
     }
   }
+
 }
 
 class Token(start: Boolean)
 
+// +/-IN
 // label: name of the token, start: start or end?
 case class RegularToken(label: String, start: Boolean) extends Token(start)
 
+// +/-OUT
 // start: start or end?
 case class QuietToken(start: Boolean) extends Token(start)
 
+// +/-EXC
 // start: start or end?
 case class ExerciseToken(start: Boolean) extends Token(start)
 
 // s: next line is replaced with this text, start: start or end?
 case class ReplaceToken(s: String, start: Boolean) extends Token(start)
 
+// +/-EXCSUBST
 // s: next line is replaced with this text, start: start or end?
 case class ExerciseReplaceToken(s: String, start: Boolean) extends Token(start)
 
 /**
-  *
-  * @param active  true if lines are printed.
-  * @param counter number of code snippets (until now)
-  * @param buffer  buffer to collect the output text.
-  */
+ *
+ * @param active  true if lines are printed.
+ * @param counter number of code snippets (until now)
+ * @param buffer  buffer to collect the output text.
+ */
 case class Record(var active: Boolean, var counter: Int = 1, buffer: StringBuffer = new StringBuffer())

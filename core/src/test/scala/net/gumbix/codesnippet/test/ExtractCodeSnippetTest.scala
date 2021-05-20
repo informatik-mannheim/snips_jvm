@@ -69,7 +69,7 @@ class ExtractCodeSnippetTest {
 
   /**
     * Performs the snippets extractor for a given prefix of
-    * a file name.
+    * a file name. Update is forced.
     * @param filenamePrefix prefix, e.g. Testfile01
     * @return A tuple of size 2. First entry: result of public
     *         snippet; second entry: result of solution snippet.
@@ -79,9 +79,9 @@ class ExtractCodeSnippetTest {
     val file = new File(srcDir + "/" + filename)
 
     val p = new ExtractCodeSnippet(file, "//",
-      snippetsPublicTargetDir, srcPublicTargetDir, false)
+      snippetsPublicTargetDir, srcPublicTargetDir, false, true)
     val s = new ExtractCodeSnippet(file, "//",
-      snippetsSolutionTargetDir, srcSolutionTargetDir, true)
+      snippetsSolutionTargetDir, srcSolutionTargetDir, true, true)
   }
 
   def compareTestfiles(filenamePrefix: String) = {
